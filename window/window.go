@@ -5,8 +5,8 @@ import (
 	"github.com/go-gl/gl"
 	"github.com/go-gl/glfw"
 	"github.com/ianvollick/gojira/content"
-	"log"
 	"image"
+	"log"
 )
 
 // | These together to record which button is up or down.
@@ -36,7 +36,7 @@ type Window struct {
 
 	// Position of the Frame's origin in the viewport. Starts as 0, 0 where the
 	// Window (aka viewport) will show the upper left corner of the content.Frame.
-	// rjk presumes that positive y extends down the page and positive x increase 
+	// rjk presumes that positive y extends down the page and positive x increase
 	// towards the right. As a result, x, y are <= 0.
 	//
 	// rjk:  T S cs = ws for Translation and Scale and cs is in content coordinates. Verify.
@@ -60,7 +60,7 @@ func (window *Window) RunMessageLoop() {
 	for should_continue {
 		// TODO(rjkroege): full generality: provide the transform to bring the Frame into
 		// Window coordinates and the width and height.
- 		window.fw, window.fh = window.frame.Draw(window.x, window.y, float32(window.width), float32(window.height))
+		window.fw, window.fh = window.frame.Draw(window.x, window.y, float32(window.width), float32(window.height))
 		glfw.SwapBuffers()
 		should_continue = glfw.WindowParam(glfw.Opened) == 1
 	}
@@ -171,17 +171,17 @@ func (window *Window) onMouseWheel(absolute_displacement int) {
 
 	// TODO(rjkroege): Is this still signed correctly?
 	//  delta = -delta
-	
+
 	// Scrolling is currently only in one dimension because of glfw limitation.
 	// TODO(rjkroege): enable two-dimensional scrolling.
 	// window.x = content.Max(window.width - window.fw, window.x + float32(delta.x))
-	window.y = content.Max(float32(window.height) - window.fh, window.y + float32(delta))
+	window.y = content.Max(float32(window.height)-window.fh, window.y+float32(delta))
 	// Can't scroll before the start of the content area.
 	if window.y > 0.0 {
 		window.y = 0.0
 	}
 
-	log.Printf("window.y is max of %f %f\n", float32(window.height) - window.fh, window.y + float32(delta))
+	log.Printf("window.y is max of %f %f\n", float32(window.height)-window.fh, window.y+float32(delta))
 
 	if window.y >= 0.0 {
 		log.Print("i have the scrolling sign backwards")

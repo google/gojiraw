@@ -11,7 +11,7 @@ import (
 // Element is a placeholder for an element.
 type Element struct {
 	// TODO(rjkroege): Convert this to a float.
-	image.Rectangle	
+	image.Rectangle
 	color.RGBA
 }
 
@@ -58,7 +58,7 @@ type Frame struct {
 // with a quad.
 func (f *Frame) AddElement(p image.Point) {
 	ne := len(f.displaylist)
-	ndl := f.displaylist[0:ne + 1]
+	ndl := f.displaylist[0 : ne+1]
 	(&ndl[ne]).init(p)
 	f.displaylist = ndl
 }
@@ -80,9 +80,9 @@ func Min(x1, x2 float32) float32 {
 // Pan sets a translation on the Frame to permit the Frame to move around within
 // its viewport. Translates the viewport w.r.t. the Frame origin by p.
 func (f *Frame) Pan(dx, dy float32) {
-	f.x =Min(f.x + dx, f.w)
-	f.y += Min(f.y + dy, f.h)
-	log.Printf("translation: %d %d", f.x, f.y )
+	f.x = Min(f.x+dx, f.w)
+	f.y += Min(f.y+dy, f.h)
+	log.Printf("translation: %d %d", f.x, f.y)
 }
 
 // Resize tells the frame what its size should be.
@@ -117,9 +117,9 @@ func (frame *Frame) Draw(x, y, vw, vh float32) (fw, fh float32) {
 	fw = 0.0
 	fh = 0.0
 
-	for _, e := range(frame.displaylist) {
+	for _, e := range frame.displaylist {
 		ow, oh := e.Draw()
-		fw  = Max(fw, ow)
+		fw = Max(fw, ow)
 		fh = Max(fh, oh)
 	}
 	gl.PopMatrix()
