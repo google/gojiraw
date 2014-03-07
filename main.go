@@ -4,8 +4,8 @@ package main
 import (
 	"fmt"
 	"github.com/go-gl/glfw"
-	"github.com/ianvollick/gojira/window"
 	"os"
+	"window"
 )
 
 func main() {

@@ -2,9 +2,9 @@
 package window
 
 import (
+	"content"
 	"github.com/go-gl/gl"
 	"github.com/go-gl/glfw"
-	"github.com/ianvollick/gojira/content"
 	"image"
 	"log"
 )
