@@ -33,12 +33,6 @@ var (
 	ATAN_TEST_CASES = []float64{-.99, 0, 0.0001, 0.99}
 )
 
-func TestTan2Atan(t *testing.T) {
-	for _, theta := range ATAN_TEST_CASES {
-		AssertFloatEqual(t, Tan2Atan(theta), math.Tan(2.0*math.Atan(theta)))
-	}
-}
-
 func TestSin2Atan(t *testing.T) {
 	for _, theta := range ATAN_TEST_CASES {
 		AssertFloatEqual(t, Sin2Atan(theta), math.Sin(2.0*math.Atan(theta)))
@@ -49,78 +43,6 @@ func TestCos2Atan(t *testing.T) {
 	for _, theta := range ATAN_TEST_CASES {
 		AssertFloatEqual(t, Cos2Atan(theta), math.Cos(2.0*math.Atan(theta)))
 	}
-}
-
-func TestPointEqual(t *testing.T) {
-	p1 := new(Point)
-	p2 := new(Point)
-	AssertTrue(t, p1.Equal(p2))
-	p1.x = 1
-	AssertFalse(t, p1.Equal(p2))
-	p2.x = 1
-	AssertTrue(t, p1.Equal(p2))
-	p2.y = 1
-	AssertFalse(t, p1.Equal(p2))
-}
-
-func TestPointAdd(t *testing.T) {
-	p := Point{2, 2}
-	v := Vector{3, 4}
-	AssertTrue(t, p.Add(&v).Equal(&Point{5, 6}))
-}
-
-func TestPointSubtract(t *testing.T) {
-	p := Point{2, 2}
-	v := Vector{3, 4}
-	AssertTrue(t, p.Subtract(&v).Equal(&Point{-1, -2}))
-}
-
-func TestPointMidpoint(t *testing.T) {
-	type TestCase struct {
-		p        Point
-		expected Point
-	}
-
-	cases := []TestCase{
-		TestCase{Point{1, 1}, Point{0.5, 0.5}},
-		TestCase{Point{0, 1}, Point{0, 0.5}},
-		TestCase{Point{0, 0}, Point{0, 0}},
-		TestCase{Point{-1, -1}, Point{-0.5, -0.5}}}
-
-	o := new(Point)
-	for _, c := range cases {
-		AssertTrue(t, o.Midpoint(&c.p).Equal(&c.expected))
-	}
-}
-
-func TestPointBisector(t *testing.T) {
-	type TestCase struct {
-		p        Point
-		expected *Line
-	}
-	cases := []TestCase{
-		TestCase{Point{1, 1}, new(Line)},
-		TestCase{Point{0, 1}, new(Line)},
-		TestCase{Point{-1, -1}, new(Line)},
-	}
-	o := new(Point)
-	for _, c := range cases {
-		b := o.Bisector(&c.p)
-		m := o.Midpoint(&c.p)
-		cp1 := b.ClosestPoint(&HomogenousPoint{o.x, o.y, 1}).Normalize()
-		cp2 := b.ClosestPoint(&HomogenousPoint{c.p.x, c.p.y, 1}).Normalize()
-		AssertTrue(t, m.Equal(cp1))
-		AssertTrue(t, m.Equal(cp2))
-	}
-}
-
-func TestPointBadBisector(t *testing.T) {
-	o := new(Point)
-	p := new(Point)
-	b := o.Bisector(p)
-	AssertFloatEqual(t, 0, b.n.x)
-	AssertFloatEqual(t, 0, b.n.y)
-	AssertFloatEqual(t, 0, b.c)
 }
 
 // Returns tan(0.5 * acos(d))
