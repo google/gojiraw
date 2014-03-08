@@ -2,10 +2,10 @@
 package main
 
 import (
+	"code.google.com/a/google.com/p/gojira/window"
 	"fmt"
 	"github.com/go-gl/glfw"
 	"os"
-	"window"
 )
 
 func main() {

@@ -2,7 +2,7 @@
 package window
 
 import (
-	"content"
+	"code.google.com/a/google.com/p/gojira/content"
 	"github.com/go-gl/gl"
 	"github.com/go-gl/glfw"
 	"image"
