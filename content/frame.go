@@ -11,30 +11,68 @@ import (
 // Element is a placeholder for an element.
 type Element struct {
 	// TODO(rjkroege): Convert this to a float.
-	image.Rectangle
-	color.RGBA
+	rect    image.Rectangle
+	color   color.RGBA
+	hoveron bool
 }
 
 func (e *Element) init(tl image.Point) {
-	e.Min = tl
-	e.Max = tl.Add(image.Pt(90, 90))
-	e.RGBA = color.RGBA{uint8(0xff), uint8(0), uint8(0), uint8(25)}
+	r := image.Rectangle{tl, tl.Add(image.Pt(90, 90))}
+	e.rect = r
+	e.color = color.RGBA{uint8(0), uint8(0), uint8(0), uint8(25)}
+	e.hoveron = false
+}
+
+func (e *Element) DrawHandle() {
+	// TODO(rjkroege): Need an in-selection hover mode.
+	if e.hoveron {
+		gl.PointSize(8.)
+		gl.Color4ub(0xff, 0, 0, 0xff)
+	} else {
+		gl.PointSize(2.)
+		gl.Color4ub(0x0, 0, 0, 0xf0)
+	}
+
+	r := e.rect
+	gl.Color4ub(0xff, 0, 0, 0xff)
+	gl.Begin(gl.POINTS)
+	gl.Vertex2i(r.Min.X, r.Min.Y)
+	gl.Vertex2i(r.Max.X, r.Min.Y)
+	gl.Vertex2i(r.Max.X, r.Max.Y)
+	gl.Vertex2i(r.Min.X, r.Max.Y)
+	gl.End()
 }
 
 // Draw renders a single quad using OpenGL
+// TODO(rjkroege): compute bounds sensibly.
 func (e *Element) Draw() (ow, oh float32) {
-	ow = float32(e.Max.X)
-	oh = float32(e.Max.Y)
+	c := e.color
+	r := e.rect
 
-	gl.Color4b(int8(e.R), int8(e.G), int8(e.R), int8(e.A))
+	ow = float32(r.Max.X)
+	oh = float32(r.Max.Y)
+
+	gl.Color4ub(c.R, c.G, c.R, c.A)
 	gl.Begin(gl.QUADS)
-	gl.Vertex2i(e.Min.X, e.Min.Y)
-	gl.Vertex2i(e.Max.X, e.Min.Y)
-	gl.Vertex2i(e.Max.X, e.Max.Y)
-	gl.Vertex2i(e.Min.X, e.Max.Y)
+	gl.Vertex2i(r.Min.X, r.Min.Y)
+	gl.Vertex2i(r.Max.X, r.Min.Y)
+	gl.Vertex2i(r.Max.X, r.Max.Y)
+	gl.Vertex2i(r.Min.X, r.Max.Y)
 	gl.End()
 
+	e.DrawHandle()
+
 	return
+}
+
+func (e *Element) HoverOn() {
+	log.Printf("HoverOn")
+	e.hoveron = true
+}
+
+func (e *Element) HoverOff() {
+	log.Printf("HoverOff")
+	e.hoveron = false
 }
 
 // Frame is the Gojira equivalent of a RenderFrame in Chrome?
@@ -51,7 +89,13 @@ type Frame struct {
 
 	// rjk's understanding of Go: the backing for this is big but this object
 	// is a slice and therefore Frame is small.
+	// A list of elements. Note that Elements should really form a tree.
+	// Perhaps also, we want to split the concept of the display list from
+	// the model. At first however: the implicit Z order is from most recent.
 	displaylist []Element
+
+	// The most recently mouse-overed element or nil.
+	overelement *Element
 }
 
 // AddElement extends the display list slice and fills in the new element
@@ -61,6 +105,32 @@ func (f *Frame) AddElement(p image.Point) {
 	ndl := f.displaylist[0 : ne+1]
 	(&ndl[ne]).init(p)
 	f.displaylist = ndl
+}
+
+// Find the element, if any, under Point p. Return nil if there is no
+// Element under p.
+// TODO(rjkroege): The model could be a tree eventually. :-)
+func (f *Frame) FindElementAtPoint(p image.Point) *Element {
+	log.Printf("FindElementAtPoint %v", p)
+	for i := len(f.displaylist) - 1; i >= 0; i-- {
+		e := &f.displaylist[i]
+		if p.In(e.rect) {
+			return e
+		}
+	}
+	return nil
+}
+
+// Adjusts visual style for elements that are
+func (f *Frame) MouseOver(e *Element) {
+	log.Printf("MouseOver: %+v", e)
+	if f.overelement != nil {
+		f.overelement.HoverOff()
+	}
+	f.overelement = e
+	if e != nil {
+		e.HoverOn()
+	}
 }
 
 func Max(x1, x2 float32) float32 {

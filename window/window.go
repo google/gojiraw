@@ -147,14 +147,23 @@ func (window *Window) onMouseBtn(button, state int) {
 		window.pointer.buttonmask &= ^(1 << b)
 	}
 
+	// Prior to running the event handler, we need to transform the points
+	// into the frame.
+	p := window.mousePositionInFrame()
+
 	// TODO(rjkroege): This code is "event handler" code. It is only here
 	// for the moment. It needs to be on the v8 thread etc.
 	if window.pointer.buttonmask == MOUSE_BUTTON_LEFT {
-		p := image.Pt(window.pointer.x, window.pointer.y)
-		p.Add(image.Pt(int(window.x), int(window.y)))
 		log.Printf("transformed point %d, %d, transformed by %f %f\n", p.X, p.Y, window.x, window.y)
 		window.frame.AddElement(p)
 	}
+}
+
+// Get the position of the mouse in the coordinates of the frame.
+func (w *Window) mousePositionInFrame() image.Point {
+	p := image.Pt(w.pointer.x, w.pointer.y)
+	p.Add(image.Pt(int(w.x), int(w.y)))
+	return p
 }
 
 // We have a problem. Mouse wheel events have an X and a Y and a
@@ -186,7 +195,6 @@ func (window *Window) onMouseWheel(absolute_displacement int) {
 	if window.y >= 0.0 {
 		log.Print("i have the scrolling sign backwards")
 	}
-
 }
 
 func (window *Window) onKey(key, state int) {
@@ -201,4 +209,15 @@ func (window *Window) onMousePos(x, y int) {
 	// log.Printf("mouse motion %d %d\n", x, y)
 	window.pointer.x = x
 	window.pointer.y = y
+
+	p := window.mousePositionInFrame()
+
+	// TODO(rjkroege): filter the events as desirable.
+
+	// TODO(rjkroege): Move the handlers elsewhere.
+	// TODO(rjkroege): Create interfaces for layer divisions.
+	// This code constitutes the mouse move event handler.
+	// Do something more clever with the hystersis as the mouse cursor leaves
+	// the target quad.
+	window.frame.MouseOver(window.frame.FindElementAtPoint(p))
 }
