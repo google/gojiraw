@@ -2,6 +2,7 @@
 package content
 
 import (
+	"code.google.com/a/google.com/p/gojira/geometry"
 	"github.com/go-gl/gl"
 	"image"
 	"image/color"
@@ -10,15 +11,26 @@ import (
 
 // Element is a placeholder for an element.
 type Element struct {
-	// TODO(rjkroege): Convert this to a float.
-	rect    image.Rectangle
+	quad    [4]geometry.Pointf
 	color   color.RGBA
 	hoveron bool
 }
 
+const (
+	dX = 90.
+	dY = 90.
+)
+
+// TODO(rjkroege): choose demaraction layer where we switch
+// to floating point coordinates. (above here though.)
 func (e *Element) init(tl image.Point) {
-	r := image.Rectangle{tl, tl.Add(image.Pt(90, 90))}
-	e.rect = r
+	pt := geometry.Ptfi(tl)
+
+	e.quad[0] = pt
+	e.quad[1] = geometry.Pointf{pt.X + dX, pt.Y}
+	e.quad[2] = geometry.Pointf{pt.X + dX, pt.Y + dY}
+	e.quad[3] = geometry.Pointf{pt.X, pt.Y + dY}
+
 	e.color = color.RGBA{uint8(0), uint8(0), uint8(0), uint8(25)}
 	e.hoveron = false
 }
@@ -33,31 +45,31 @@ func (e *Element) DrawHandle() {
 		gl.Color4ub(0x0, 0, 0, 0xf0)
 	}
 
-	r := e.rect
 	gl.Color4ub(0xff, 0, 0, 0xff)
 	gl.Begin(gl.POINTS)
-	gl.Vertex2i(r.Min.X, r.Min.Y)
-	gl.Vertex2i(r.Max.X, r.Min.Y)
-	gl.Vertex2i(r.Max.X, r.Max.Y)
-	gl.Vertex2i(r.Min.X, r.Max.Y)
+	for _, p := range e.quad {
+		// does this make another copy of the point?
+		gl.Vertex2f(p.X, p.Y)
+	}
 	gl.End()
 }
 
-// Draw renders a single quad using OpenGL
-// TODO(rjkroege): compute bounds sensibly.
+// Draw renders a single quad using OpenGL returning the maximum point
+// in the Element needed to contain the element.
+// TODO(rjkroege): Return the tightest bounding box.
 func (e *Element) Draw() (ow, oh float32) {
 	c := e.color
-	r := e.rect
-
-	ow = float32(r.Max.X)
-	oh = float32(r.Max.Y)
+	ow = 0.
+	oh = 0.
 
 	gl.Color4ub(c.R, c.G, c.R, c.A)
 	gl.Begin(gl.QUADS)
-	gl.Vertex2i(r.Min.X, r.Min.Y)
-	gl.Vertex2i(r.Max.X, r.Min.Y)
-	gl.Vertex2i(r.Max.X, r.Max.Y)
-	gl.Vertex2i(r.Min.X, r.Max.Y)
+	for _, p := range e.quad {
+		// My presumption is that this structure does not copy.
+		ow = Max(ow, p.X)
+		oh = Max(oh, p.Y)
+		gl.Vertex2f(p.X, p.Y)
+	}
 	gl.End()
 
 	e.DrawHandle()
@@ -111,10 +123,13 @@ func (f *Frame) AddElement(p image.Point) {
 // Element under p.
 // TODO(rjkroege): The model could be a tree eventually. :-)
 func (f *Frame) FindElementAtPoint(p image.Point) *Element {
+	pf := geometry.Ptfi(p)
 	log.Printf("FindElementAtPoint %v", p)
 	for i := len(f.displaylist) - 1; i >= 0; i-- {
 		e := &f.displaylist[i]
-		if p.In(e.rect) {
+		// TODO(rjkroege): Replace this appropriately.
+		r := geometry.Rectanglef{e.quad[0], e.quad[2]}
+		if pf.In(r) {
 			return e
 		}
 	}
