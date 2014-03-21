@@ -2,16 +2,16 @@
 package content
 
 import (
-	"code.google.com/a/google.com/p/gojira/geometry"
 	"github.com/go-gl/gl"
 	"image"
 	"image/color"
 	"log"
+	"code.google.com/a/google.com/p/gojira/geometry"
 )
 
 // Element is a placeholder for an element.
 type Element struct {
-	quad    [4]geometry.Pointf
+	quad [4]geometry.Pointf
 	color   color.RGBA
 	hoveron bool
 }
@@ -47,7 +47,7 @@ func (e *Element) DrawHandle() {
 
 	gl.Color4ub(0xff, 0, 0, 0xff)
 	gl.Begin(gl.POINTS)
-	for _, p := range e.quad {
+	for _, p := range(e.quad) {
 		// does this make another copy of the point?
 		gl.Vertex2f(p.X, p.Y)
 	}
@@ -64,7 +64,7 @@ func (e *Element) Draw() (ow, oh float32) {
 
 	gl.Color4ub(c.R, c.G, c.R, c.A)
 	gl.Begin(gl.QUADS)
-	for _, p := range e.quad {
+	for _, p := range(e.quad) {
 		// My presumption is that this structure does not copy.
 		ow = Max(ow, p.X)
 		oh = Max(oh, p.Y)
@@ -136,7 +136,8 @@ func (f *Frame) FindElementAtPoint(p image.Point) *Element {
 	return nil
 }
 
-// Adjusts visual style for elements that are
+// Adjusts visual style for elements that are under the
+// mouse pointer.
 func (f *Frame) MouseOver(e *Element) {
 	log.Printf("MouseOver: %+v", e)
 	if f.overelement != nil {

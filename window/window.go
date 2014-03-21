@@ -25,12 +25,12 @@ const (
 // Stores the current mouse pointer position.
 type Mousepointer struct {
 	x, y       int
-	buttonmask int
+	buttonmask uint32
 }
 
 // TODO: when this gets big, it might want to be a package.
 type Window struct {
-	width, height int
+	width, height uint32
 	frame         *content.Frame
 	pointer       Mousepointer
 
@@ -51,7 +51,7 @@ type Window struct {
 }
 
 func NewWindow(width int, height int) *Window {
-	return &Window{width, height, content.NewFrame(), Mousepointer{0, 0, 0}, 0.0, 0.0,
+	return &Window{uint32(width), uint32(height), content.NewFrame(), Mousepointer{0, 0, 0}, 0.0, 0.0,
 		float32(width), float32(height), 0}
 }
 
@@ -77,7 +77,8 @@ func (window *Window) Open() {
 	mode := glfw.Windowed
 
 	// TODO: what's go style here? How do you get clang-format for go?
-	err := glfw.OpenWindow(window.width, window.height,
+	// TODO(rjkroege): sizes should be uints
+	err := glfw.OpenWindow(int(window.width), int(window.height),
 		red_bits, green_bits, blue_bits, alpha_bits,
 		depth_bits, stencil_bits,
 		mode)
@@ -134,28 +135,18 @@ func (window *Window) onResize(w, h int) {
 }
 
 func (window *Window) onMouseBtn(button, state int) {
-	// log.Printf("mouse button: %d, %d\n", button, state)
-
 	if button < 0 || button > 31 || state < 0 || state > 1 {
 		log.Fatal("button/state values from glfw are silly: ", button, state)
 	}
 
-	b := uint(button)
+	b := uint32(button)
+	p := window.mousePositionInFrame()
 	if state == 1 {
 		window.pointer.buttonmask |= 1 << b
+		mousedown(window.frame, p, b, window.pointer.buttonmask)		
 	} else {
 		window.pointer.buttonmask &= ^(1 << b)
-	}
-
-	// Prior to running the event handler, we need to transform the points
-	// into the frame.
-	p := window.mousePositionInFrame()
-
-	// TODO(rjkroege): This code is "event handler" code. It is only here
-	// for the moment. It needs to be on the v8 thread etc.
-	if window.pointer.buttonmask == MOUSE_BUTTON_LEFT {
-		log.Printf("transformed point %d, %d, transformed by %f %f\n", p.X, p.Y, window.x, window.y)
-		window.frame.AddElement(p)
+		mouseup(window.frame, p, b, window.pointer.buttonmask)	
 	}
 }
 
