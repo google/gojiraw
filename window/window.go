@@ -207,12 +207,6 @@ func (window *Window) onMousePos(x, y int) {
 
 	p := window.mousePositionInFrame()
 
-	// TODO(rjkroege): filter the events as desirable.
-
-	// TODO(rjkroege): Move the handlers elsewhere.
-	// TODO(rjkroege): Create interfaces for layer divisions.
-	// This code constitutes the mouse move event handler.
-	// Do something more clever with the hystersis as the mouse cursor leaves
-	// the target quad.
-	window.frame.MouseOver(window.frame.FindElementAtPoint(p))
+	// TODO(rjkroege): filter/collapse/schedule the events as desirable.
+	window.ev.Mousemove(p, window.pointer.buttonmask)
 }

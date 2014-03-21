@@ -19,6 +19,9 @@ type EventHandler interface {
 
 	// Corresponds to JS registered with onmouseup
 	Mouseup(pt image.Point, button, buttons uint32) uint32
+
+	// Corresponds to JS registered with onmousemove
+	Mousemove(pt image.Point, buttons uint32) uint32
 }
 
 
@@ -41,6 +44,11 @@ func (f *Frame) Mouseup(pt image.Point, button, buttons  uint32) uint32 {
 	if button == 0 {
 		f.AddElement(pt)	
 	}
+	return EVD_PREVDEF
+}
+
+func (f *Frame) Mousemove(pt image.Point, buttons  uint32) uint32 {
+	f.MouseOver(f.FindElementAtPoint(pt))
 	return EVD_PREVDEF
 }
 
