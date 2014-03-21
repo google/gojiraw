@@ -155,10 +155,10 @@ func (window *Window) onMouseBtn(button, state int) {
 }
 
 // Get the position of the mouse in the coordinates of the frame.
-// This function is currently broken when we're scrolled.
+// The sub is right for y-axis but since we can't scroll x-axis.
 func (w *Window) mousePositionInFrame() image.Point {
 	p := image.Pt(w.pointer.x, w.pointer.y)
-	p.Add(image.Pt(int(w.x), int(w.y)))
+	p = p.Sub(image.Pt(int(w.x), int(w.y)))
 	return p
 }
 
