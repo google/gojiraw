@@ -155,43 +155,58 @@ func (window *Window) onMouseBtn(button, state int) {
 }
 
 // Get the position of the mouse in the coordinates of the frame.
+// This function is currently broken when we're scrolled.
 func (w *Window) mousePositionInFrame() image.Point {
 	p := image.Pt(w.pointer.x, w.pointer.y)
 	p.Add(image.Pt(int(w.x), int(w.y)))
 	return p
 }
 
-// We have a problem. Mouse wheel events have an X and a Y and a
-// whole bunch of other things. But here, mousewheels are one-dimensional.
-// TODO(rjkroege): plumb a richer wheel event type to here.
-// It would appear that delta isn't a delta..
+// Mini-essay on the way of scrolling. In scrolling, there are two
+// conceptual entities: the viewport and the contents.
+// 
+// I maintain that scrolling should be handled by the viewport. The
+// contents should provide the capability of drawing an arbitrary
+// subrectangle of itself. But the choice of subrectangle is managed by
+// the viewport.
+// 
+// The principle here is to handle the event as "close" to where it
+// arrives as possible. In particular: scrolling will happen in the
+// browser.
 func (window *Window) onMouseWheel(absolute_displacement int) {
 	log.Printf("mouse wheel abs: %d\n", absolute_displacement)
 
+	// TODO(rjkroege): displacement is stupid because of glfw issue. Fix.
 	// delta is not a delta. I am instead interested in the difference.
 	delta := absolute_displacement - window.previous_absolute_displacement
 	window.previous_absolute_displacement = absolute_displacement
-	log.Printf("mouse wheel delta: %d\n", delta)
+	// log.Printf("mouse wheel delta: %d\n", delta)
 
-	// TODO(rjkroege): Is this still signed correctly?
-	//  delta = -delta
 
+	dx := float32(delta)
 	// Scrolling is currently only in one dimension because of glfw limitation.
 	// TODO(rjkroege): enable two-dimensional scrolling.
-	// window.x = content.Max(window.width - window.fw, window.x + float32(delta.x))
-	window.y = content.Max(float32(window.height)-window.fh, window.y+float32(delta))
-	// Can't scroll before the start of the content area.
-	if window.y > 0.0 {
-		window.y = 0.0
-	}
 
-	log.Printf("window.y is max of %f %f\n", float32(window.height)-window.fh, window.y+float32(delta))
+	p := window.mousePositionInFrame()
+	if window.ev.Wheel(p, window.pointer.buttonmask, dx, 0, 0) != content.EVD_PREVDEF {
+		// window.x = content.Max(window.width - window.fw, window.x + float32(delta.x))
+		// Consider putting Max in some kind of base-like class.
+		window.y = content.Max(float32(window.height)-window.fh, window.y + dx)
 
-	if window.y >= 0.0 {
-		log.Print("i have the scrolling sign backwards")
+		// Can't scroll before the start of the content area (need x limit in the future.)
+		if window.y > 0.0 {
+			window.y = 0.0
+		}
+	
+		log.Printf("window.y is max of %f %f\n", float32(window.height)-window.fh, window.y+float32(delta))
+	
+		if window.y >= 0.0 {
+			log.Print("i have the scrolling sign backwards")
+		}
 	}
 }
 
+// TODO(rjkroege): Add support for delivering of key events.
 func (window *Window) onKey(key, state int) {
 	log.Printf("key: %d, %d\n", key, state)
 }

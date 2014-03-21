@@ -22,6 +22,9 @@ type EventHandler interface {
 
 	// Corresponds to JS registered with onmousemove
 	Mousemove(pt image.Point, buttons uint32) uint32
+
+	// Corresponds to JS registered with onmousewheel
+	Wheel(pt image.Point, buttons uint32, dx, dy, dz float32) uint32
 }
 
 
@@ -52,8 +55,8 @@ func (f *Frame) Mousemove(pt image.Point, buttons  uint32) uint32 {
 	return EVD_PREVDEF
 }
 
-//func mousewheel(f *content.Frame, pt image.Point, ) {
-//
-//}
+func (f *Frame) Wheel(pt image.Point, buttons  uint32, dx, dy, dz float32) uint32 {
+	return EVD_NON
+}
 
 
