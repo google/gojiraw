@@ -48,11 +48,15 @@ type Window struct {
 	// TODO(rjkroege): When the mouse wheel handling is rational and actually
 	// ships us deltas, then we can remove this code.
 	previous_absolute_displacement int
+
+	// Event handling interface
+	ev content.EventHandler
 }
 
 func NewWindow(width int, height int) *Window {
-	return &Window{uint32(width), uint32(height), content.NewFrame(), Mousepointer{0, 0, 0}, 0.0, 0.0,
-		float32(width), float32(height), 0}
+	c := content.NewFrame()
+	return &Window{uint32(width), uint32(height), c, Mousepointer{0, 0, 0}, 0.0, 0.0,
+		float32(width), float32(height), 0, c}
 }
 
 func (window *Window) RunMessageLoop() {
@@ -143,10 +147,10 @@ func (window *Window) onMouseBtn(button, state int) {
 	p := window.mousePositionInFrame()
 	if state == 1 {
 		window.pointer.buttonmask |= 1 << b
-		mousedown(window.frame, p, b, window.pointer.buttonmask)		
+		window.ev.Mousedown(p, b, window.pointer.buttonmask)		
 	} else {
 		window.pointer.buttonmask &= ^(1 << b)
-		mouseup(window.frame, p, b, window.pointer.buttonmask)	
+		window.ev.Mouseup(p, b, window.pointer.buttonmask)	
 	}
 }
 
