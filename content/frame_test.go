@@ -2,10 +2,20 @@ package content
 
 import (
 	"github.com/rjkroege/wikitools/testhelpers"
+	"code.google.com/a/google.com/p/gojira/geometry"
 	"image"
 	"testing"
 )
 
+func Test_FindVertex(t *testing.T) {
+	e := new(Element)
+	e.init(image.Pt(10, 15))
+
+	v := e.FindVertex(geometry.Pointf{5, 5})
+	testhelpers.AssertInt(t, -1, v)
+}
+
+/*
 func Test_FindElementAtPoint(t *testing.T) {
 	f := NewFrame()
 	testhelpers.AssertInt(t, 0, len(f.displaylist))
@@ -30,3 +40,4 @@ func Test_FindElementAtPoint(t *testing.T) {
 		t.Errorf("point 30,10 in %+v but found element is %+v", f.displaylist[0], e)
 	}
 }
+*/

@@ -14,11 +14,12 @@ type Element struct {
 	quad [4]geometry.Pointf
 	color   color.RGBA
 	hoveron bool
+	vertex int
 }
 
 const (
-	dX = 90.
-	dY = 90.
+	dX = 45.
+	dY = 45.
 )
 
 // TODO(rjkroege): choose demaraction layer where we switch
@@ -26,32 +27,34 @@ const (
 func (e *Element) init(tl image.Point) {
 	pt := geometry.Ptfi(tl)
 
-	e.quad[0] = pt
-	e.quad[1] = geometry.Pointf{pt.X + dX, pt.Y}
+	e.quad[0] = geometry.Pointf{pt.X - dX, pt.Y - dY}
+	e.quad[1] = geometry.Pointf{pt.X + dX, pt.Y - dY}
 	e.quad[2] = geometry.Pointf{pt.X + dX, pt.Y + dY}
-	e.quad[3] = geometry.Pointf{pt.X, pt.Y + dY}
+	e.quad[3] = geometry.Pointf{pt.X - dX, pt.Y + dY}
 
 	e.color = color.RGBA{uint8(0), uint8(0), uint8(0), uint8(25)}
 	e.hoveron = false
 }
 
 func (e *Element) DrawHandle() {
-	// TODO(rjkroege): Need an in-selection hover mode.
+	gl.PointSize(2.)
+	gl.Color4ub(0x0, 0, 0, 0xf0)
+	gl.Begin(gl.POINTS)
+	for i, p := range(e.quad) {
+		if !e.hoveron || i != e.vertex {
+			// does this make another copy of the point?
+			gl.Vertex2f(p.X, p.Y)
+		}
+	}
+	gl.End()
+
 	if e.hoveron {
 		gl.PointSize(8.)
 		gl.Color4ub(0xff, 0, 0, 0xff)
-	} else {
-		gl.PointSize(2.)
-		gl.Color4ub(0x0, 0, 0, 0xf0)
+		gl.Begin(gl.POINTS)
+		gl.Vertex2f(e.quad[e.vertex].X, e.quad[e.vertex].Y)
+		gl.End()
 	}
-
-	gl.Color4ub(0xff, 0, 0, 0xff)
-	gl.Begin(gl.POINTS)
-	for _, p := range(e.quad) {
-		// does this make another copy of the point?
-		gl.Vertex2f(p.X, p.Y)
-	}
-	gl.End()
 }
 
 // Draw renders a single quad using OpenGL returning the maximum point
@@ -77,14 +80,28 @@ func (e *Element) Draw() (ow, oh float32) {
 	return
 }
 
-func (e *Element) HoverOn() {
+func (e *Element) HoverOn(v int) {
 	log.Printf("HoverOn")
 	e.hoveron = true
+	e.vertex = v
 }
 
 func (e *Element) HoverOff() {
 	log.Printf("HoverOff")
 	e.hoveron = false
+}
+
+// TODO(rjkroege): move this up in the file
+// TODO(rjkroege): split apart Element and Frame code.
+func (f *Element) FindVertex(p geometry.Pointf) int {
+	o := geometry.Pointf{4., 4.}
+	for i, v := range(f.quad) {
+		r := geometry.Rectanglef{v.Sub(o), v.Add(o)}
+		if p.In(r) {
+			return i
+		}
+	}
+	return -1
 }
 
 // Frame is the Gojira equivalent of a RenderFrame in Chrome?
@@ -119,33 +136,36 @@ func (f *Frame) AddElement(p image.Point) {
 	f.displaylist = ndl
 }
 
-// Find the element, if any, under Point p. Return nil if there is no
-// Element under p.
+// Find the control point, if any, under Point p. Return nil, 0 if there is no
+// control point for an element under p. The returned int is the index
+// of the vertex.
 // TODO(rjkroege): The model could be a tree eventually. :-)
-func (f *Frame) FindElementAtPoint(p image.Point) *Element {
+func (f *Frame) FindElementAtPoint(p image.Point) (*Element, int) {
 	pf := geometry.Ptfi(p)
 	log.Printf("FindElementAtPoint %v", p)
 	for i := len(f.displaylist) - 1; i >= 0; i-- {
 		e := &f.displaylist[i]
+		v := e.FindVertex(pf)
+		
 		// TODO(rjkroege): Replace this appropriately.
-		r := geometry.Rectanglef{e.quad[0], e.quad[2]}
-		if pf.In(r) {
-			return e
+		// r := geometry.Rectanglef{e.quad[0], e.quad[2]}
+		if v > -1 {
+			return e, v
 		}
 	}
-	return nil
+	return nil, -1
 }
 
 // Adjusts visual style for elements that are under the
 // mouse pointer.
-func (f *Frame) MouseOver(e *Element) {
+func (f *Frame) MouseOver(e *Element,  v int) {
 	log.Printf("MouseOver: %+v", e)
 	if f.overelement != nil {
 		f.overelement.HoverOff()
 	}
 	f.overelement = e
 	if e != nil {
-		e.HoverOn()
+		e.HoverOn(v)
 	}
 }
 

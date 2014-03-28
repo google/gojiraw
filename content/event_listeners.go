@@ -51,11 +51,13 @@ func (f *Frame) Mouseup(pt image.Point, button, buttons  uint32) uint32 {
 }
 
 func (f *Frame) Mousemove(pt image.Point, buttons  uint32) uint32 {
-	f.MouseOver(f.FindElementAtPoint(pt))
+	e, v := f.FindElementAtPoint(pt)
+	f.MouseOver(e, v)
 	return EVD_PREVDEF
 }
 
 func (f *Frame) Wheel(pt image.Point, buttons  uint32, dx, dy, dz float32) uint32 {
+	// The container for the frame scrolls.
 	return EVD_NON
 }
 
