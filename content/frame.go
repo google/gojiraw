@@ -13,13 +13,19 @@ import (
 type Element struct {
 	quad [4]geometry.Pointf
 	color   color.RGBA
-	hoveron bool
+	hovermode int
 	vertex int
 }
 
 const (
 	dX = 45.
 	dY = 45.
+)
+
+const (
+	VERTEX_NON = iota		// Draw the default vertex handle.
+	VERTEX_HOVER			// Draw the hover vertex handle.
+	VERTEX_PRESS			// Draw the mouse down vertex handle
 )
 
 // TODO(rjkroege): choose demaraction layer where we switch
@@ -33,7 +39,7 @@ func (e *Element) init(tl image.Point) {
 	e.quad[3] = geometry.Pointf{pt.X - dX, pt.Y + dY}
 
 	e.color = color.RGBA{uint8(0), uint8(0), uint8(0), uint8(25)}
-	e.hoveron = false
+	e.hovermode = VERTEX_NON
 }
 
 func (e *Element) DrawHandle() {
@@ -41,14 +47,22 @@ func (e *Element) DrawHandle() {
 	gl.Color4ub(0x0, 0, 0, 0xf0)
 	gl.Begin(gl.POINTS)
 	for i, p := range(e.quad) {
-		if !e.hoveron || i != e.vertex {
+		if e.hovermode == VERTEX_NON || i != e.vertex {
 			// does this make another copy of the point?
 			gl.Vertex2f(p.X, p.Y)
 		}
 	}
 	gl.End()
 
-	if e.hoveron {
+	if e.hovermode == VERTEX_HOVER {
+		gl.PointSize(8.)
+		gl.Color4ub(0xff, 0, 0, 0xff)
+		gl.Begin(gl.POINTS)
+		gl.Vertex2f(e.quad[e.vertex].X, e.quad[e.vertex].Y)
+		gl.End()
+	}
+
+	if e.hovermode == VERTEX_HOVER {
 		gl.PointSize(8.)
 		gl.Color4ub(0xff, 0, 0, 0xff)
 		gl.Begin(gl.POINTS)
@@ -82,13 +96,13 @@ func (e *Element) Draw() (ow, oh float32) {
 
 func (e *Element) HoverOn(v int) {
 	log.Printf("HoverOn")
-	e.hoveron = true
+	e.hovermode = VERTEX_HOVER
 	e.vertex = v
 }
 
 func (e *Element) HoverOff() {
 	log.Printf("HoverOff")
-	e.hoveron = false
+	e.hovermode = VERTEX_NON
 }
 
 // TODO(rjkroege): move this up in the file
