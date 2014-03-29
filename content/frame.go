@@ -63,9 +63,9 @@ func (e *Element) DrawHandle() {
 		gl.End()
 	}
 
-	if e.hovermode == VERTEX_HOVER {
+	if e.hovermode == VERTEX_PRESS {
 		gl.PointSize(2 * dH)
-		gl.Color4ub(0xff, 0, 0, 0xff)
+		gl.Color4ub(0x0, 0, 0xff, 0xff)
 		gl.Begin(gl.POINTS)
 		gl.Vertex2f(e.quad[e.vertex].X, e.quad[e.vertex].Y)
 		gl.End()
@@ -140,6 +140,12 @@ type Frame struct {
 
 	// The most recently mouse-overed element or nil.
 	overelement *Element
+
+	// The mouse is down
+	mousedown bool
+
+	// A floating point offset from a mousedown to the centroid of the handle.
+	offset geometry.Pointf
 }
 
 // AddElement extends the display list slice and fills in the new element
@@ -245,4 +251,25 @@ func (frame *Frame) Draw(x, y, vw, vh float32) (fw, fh float32) {
 	}
 	gl.PopMatrix()
 	return
+}
+
+func (f *Frame) StartMouseDownMode(pt image.Point, e *Element, v int) {
+	f.overelement = e
+	f.mousedown = true
+	pf := geometry.Ptfi(pt)
+	f.offset = pf.Sub(e.quad[v])
+	e.hovermode = VERTEX_PRESS
+	e.vertex = v
+}
+
+func (f *Frame) InMouseDownMode(pt image.Point) {
+	// Is this idiomatic?
+	pf := geometry.Ptfi(pt)
+	e := f.overelement
+	e.quad[e.vertex] = pf.Add(f.offset)
+}
+
+func (f *Frame) EndMouseDownMode() {
+	f.mousedown = false
+	f.overelement.hovermode = VERTEX_HOVER
 }

@@ -5,6 +5,19 @@ import (
 	"log"
 )
 
+// | These together to record which button is up or down.
+// In particular: the buttons value will be some or of the following.
+const (
+	MOUSE_BUTTON_NONE = 0
+)
+
+// Reset iota.
+const (
+	MOUSE_BUTTON_LEFT = 1 << iota
+	MOUSE_BUTTON_MIDDLE
+	MOUSE_BUTTON_RIGHT
+)
+
 const (
 	EVD_NON = iota		// There is no handler.
 	EVD_PREVDEF	// A handler exists and it wishes the default action for the event to be suppressed.
@@ -28,6 +41,8 @@ type EventHandler interface {
 }
 
 
+
+
 // These are "event listeners": functionality that really
 // ought to belong in the JavaScript code of the browser.
 // As of yet, this code is busily running here though written in
@@ -40,19 +55,30 @@ type EventHandler interface {
 //
 func (f *Frame) Mousedown(pt image.Point, button, buttons uint32) uint32 {
 	log.Printf("OnMouseDown")
-	return EVD_NON
-}
 
-func (f *Frame) Mouseup(pt image.Point, button, buttons  uint32) uint32 {
-	if button == 0 {
-		f.AddElement(pt)	
+	e, v := f.FindElementAtPoint(pt)
+	if e != nil && v > -1 {
+		f.StartMouseDownMode(pt, e, v)
 	}
 	return EVD_PREVDEF
 }
 
+func (f *Frame) Mouseup(pt image.Point, button, buttons  uint32) uint32 {
+	if button == 0 && f.mousedown {
+		f.EndMouseDownMode()
+	} else if button == 0 {
+		f.AddElement(pt)	
+	} 
+	return EVD_PREVDEF
+}
+
 func (f *Frame) Mousemove(pt image.Point, buttons  uint32) uint32 {
-	e, v := f.FindElementAtPoint(pt)
-	f.MouseOver(e, v)
+	if buttons & MOUSE_BUTTON_LEFT == MOUSE_BUTTON_LEFT  {
+		f.InMouseDownMode(pt)
+	} else {
+		e, v := f.FindElementAtPoint(pt)
+		f.MouseOver(e, v)
+	}
 	return EVD_PREVDEF
 }
 

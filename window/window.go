@@ -9,19 +9,6 @@ import (
 	"log"
 )
 
-// | These together to record which button is up or down.
-// TODO(rjkroege): Bring this into alignment with webkit events.
-const (
-	MOUSE_BUTTON_NONE = 0
-)
-
-// Reset iota.
-const (
-	MOUSE_BUTTON_LEFT = 1 << iota
-	MOUSE_BUTTON_MIDDLE
-	MOUSE_BUTTON_RIGHT
-)
-
 // Stores the current mouse pointer position.
 type Mousepointer struct {
 	x, y       int
