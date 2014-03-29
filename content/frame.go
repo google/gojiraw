@@ -20,6 +20,7 @@ type Element struct {
 const (
 	dX = 45.
 	dY = 45.
+	dH = 4.
 )
 
 const (
@@ -55,7 +56,7 @@ func (e *Element) DrawHandle() {
 	gl.End()
 
 	if e.hovermode == VERTEX_HOVER {
-		gl.PointSize(8.)
+		gl.PointSize(2 * dH)
 		gl.Color4ub(0xff, 0, 0, 0xff)
 		gl.Begin(gl.POINTS)
 		gl.Vertex2f(e.quad[e.vertex].X, e.quad[e.vertex].Y)
@@ -63,7 +64,7 @@ func (e *Element) DrawHandle() {
 	}
 
 	if e.hovermode == VERTEX_HOVER {
-		gl.PointSize(8.)
+		gl.PointSize(2 * dH)
 		gl.Color4ub(0xff, 0, 0, 0xff)
 		gl.Begin(gl.POINTS)
 		gl.Vertex2f(e.quad[e.vertex].X, e.quad[e.vertex].Y)
@@ -108,7 +109,7 @@ func (e *Element) HoverOff() {
 // TODO(rjkroege): move this up in the file
 // TODO(rjkroege): split apart Element and Frame code.
 func (f *Element) FindVertex(p geometry.Pointf) int {
-	o := geometry.Pointf{4., 4.}
+	o := geometry.Pointf{dH, dH}
 	for i, v := range(f.quad) {
 		r := geometry.Rectanglef{v.Sub(o), v.Add(o)}
 		if p.In(r) {
