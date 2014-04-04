@@ -19,9 +19,9 @@ const (
 )
 
 const (
-	EVD_NON = iota		// There is no handler.
-	EVD_PREVDEF	// A handler exists and it wishes the default action for the event to be suppressed.
-	EVD_DEF // A handler exists and it wants the default action.
+	EVD_NON     = iota // There is no handler.
+	EVD_PREVDEF        // A handler exists and it wishes the default action for the event to be suppressed.
+	EVD_DEF            // A handler exists and it wants the default action.
 )
 
 // Anything Frame-like entity capable of receiving events
@@ -39,9 +39,6 @@ type EventHandler interface {
 	// Corresponds to JS registered with onmousewheel
 	Wheel(pt image.Point, buttons uint32, dx, dy, dz float32) uint32
 }
-
-
-
 
 // These are "event listeners": functionality that really
 // ought to belong in the JavaScript code of the browser.
@@ -63,17 +60,17 @@ func (f *Frame) Mousedown(pt image.Point, button, buttons uint32) uint32 {
 	return EVD_PREVDEF
 }
 
-func (f *Frame) Mouseup(pt image.Point, button, buttons  uint32) uint32 {
-	if button == 0 && f.mousedown {
+func (f *Frame) Mouseup(pt image.Point, button, buttons uint32) uint32 {
+	if button == 0 && f.mouseDown {
 		f.EndMouseDownMode()
 	} else if button == 0 {
-		f.AddElement(pt)	
-	} 
+		f.AddElement(pt)
+	}
 	return EVD_PREVDEF
 }
 
-func (f *Frame) Mousemove(pt image.Point, buttons  uint32) uint32 {
-	if buttons & MOUSE_BUTTON_LEFT == MOUSE_BUTTON_LEFT  {
+func (f *Frame) Mousemove(pt image.Point, buttons uint32) uint32 {
+	if buttons&MOUSE_BUTTON_LEFT == MOUSE_BUTTON_LEFT {
 		f.InMouseDownMode(pt)
 	} else {
 		e, v := f.FindElementAtPoint(pt)
@@ -82,9 +79,7 @@ func (f *Frame) Mousemove(pt image.Point, buttons  uint32) uint32 {
 	return EVD_PREVDEF
 }
 
-func (f *Frame) Wheel(pt image.Point, buttons  uint32, dx, dy, dz float32) uint32 {
+func (f *Frame) Wheel(pt image.Point, buttons uint32, dx, dy, dz float32) uint32 {
 	// The container for the frame scrolls.
 	return EVD_NON
 }
-
-

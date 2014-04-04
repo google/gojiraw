@@ -1,29 +1,9 @@
 // TODO: make a header
-package geometry
+package graphics
 
 import (
 	"math"
 )
-
-// Returns sin(2 * atan(d))
-func Sin2Atan(d float64) float64 {
-	return 2.0 * d / (1.0 + d*d)
-}
-
-// Returns cos(2 * atan(d))
-func Cos2Atan(d float64) float64 {
-	return (1.0 - d*d) / (1.0 + d*d)
-}
-
-// Represents both projective points and lines.
-type Dual struct {
-	x, y, w float64
-}
-
-type SignedVector struct {
-	x, y    float64
-	negated bool
-}
 
 type Arc struct {
 	p0, p1 *Dual
@@ -33,7 +13,7 @@ type Arc struct {
 	//
 	// NB: It MUST be the case that -1 < d < 1. In fact, it would do well to be
 	// smaller than 1/2 in magnitude.
-	d float64
+	d float32
 }
 
 func (arc *Arc) Normals() (l0, l1 *Dual) {
@@ -84,8 +64,8 @@ func (arc *Arc) Normals() (l0, l1 *Dual) {
 	dx := arc.p1.x - arc.p0.x
 	dy := arc.p1.y - arc.p0.y
 
-	// We happen to want sin and cos of this angle for rotating. There happen to
-	// be cute closed forms for getting these values.
+	// We want sin and cos of this angle for rotating. There are happen to be
+	// cute closed forms for getting these values.
 	sin := Sin2Atan(arc.d)
 	cos := Cos2Atan(arc.d)
 
@@ -120,8 +100,14 @@ func (arc *Arc) Apex() *Dual {
 		1.0}
 }
 
+type SignedVector struct {
+	x, y    float32
+	negated bool
+}
+
 func (arc *Arc) SignedVectorToClosestArcPoint(point *Dual) *SignedVector {
 	n0, n1 := arc.Normals()
+	// Note: in the shader, we will never ask for a point outside the wedge.
 	if !IsInWedge(point, n0, n1) {
 		dx0 := point.x - arc.p0.x
 		dy0 := point.y - arc.p0.y
@@ -133,6 +119,9 @@ func (arc *Arc) SignedVectorToClosestArcPoint(point *Dual) *SignedVector {
 		return &SignedVector{dx1, dy1, false}
 	}
 
+	// In the shader, this will be much simpler. What we're computing here is
+	// the distance to the two normal lines. If we store these distances at
+	// each of the vertices, GL will interpolate for us.
 	d0 := n0.ProjectiveDistanceTo(point)
 	d1 := n1.ProjectiveDistanceTo(point)
 
@@ -145,9 +134,10 @@ func (arc *Arc) SignedVectorToClosestArcPoint(point *Dual) *SignedVector {
 	l0 := Dual{px, py, -(px*point.x + py*point.y)}
 
 	// FIXME: the only reason for the following sqrt's is to get the angular
-	// bisector of n0 and (px, py). Can that be obtained more cheaply?
-	length0 := math.Hypot(n0.x, n0.y)
-	length1 := math.Hypot(px, py)
+	// bisector of n0 and (px, py). Can that be obtained more cheaply? Maybe
+	// it doesn't matter: invsqrt is pretty fast.
+	length0 := float32(math.Hypot(float64(n0.x), float64(n0.y)))
+	length1 := float32(math.Hypot(float64(px), float64(py)))
 
 	// This is is a line (through the origin) coincident with the angular bisector
 	// of n0 and (px, py).
@@ -171,37 +161,11 @@ func (arc *Arc) SignedVectorToClosestArcPoint(point *Dual) *SignedVector {
 	return &v
 }
 
-func (arc *Arc) EuclideanDistanceTo(point *Dual) float64 {
+func (arc *Arc) EuclideanDistanceTo(point *Dual) float32 {
 	v := arc.SignedVectorToClosestArcPoint(point)
-	distance := math.Hypot(v.x, v.y)
+	distance := float32(math.Hypot(float64(v.x), float64(v.y)))
 	if v.negated {
 		distance *= -1.0
 	}
 	return distance
-}
-
-func (d *Dual) Bisector(other *Dual) *Dual {
-	sx := d.x + other.x
-	sy := d.y + other.y
-	dx := other.x - d.x
-	dy := other.y - d.y
-	return &Dual{dx, dy, -0.5 * (dx*sx + dy*sy)}
-}
-
-func (d *Dual) Normalize() *Dual {
-	return &Dual{d.x / d.w, d.y / d.w, 1}
-}
-
-func (a *Dual) ProjectiveDistanceTo(b *Dual) float64 {
-	return a.x*b.x + a.y*b.y + a.w*b.w
-}
-
-func (a *Dual) AngularDistanceTo(b *Dual) float64 {
-	return a.x*b.x + a.y*b.y
-}
-
-func (d0 *Dual) Intersection(d1 *Dual) *Dual {
-	return &Dual{d0.y*d1.w - d0.w*d1.y,
-		d0.w*d1.x - d0.x*d1.w,
-		d0.x*d1.y - d0.y*d1.x}
 }

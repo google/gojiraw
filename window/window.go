@@ -3,6 +3,7 @@ package window
 
 import (
 	"code.google.com/a/google.com/p/gojira/content"
+	"code.google.com/a/google.com/p/gojira/graphics"
 	"github.com/go-gl/gl"
 	"github.com/go-gl/glfw"
 	"image"
@@ -134,10 +135,10 @@ func (window *Window) onMouseBtn(button, state int) {
 	p := window.mousePositionInFrame()
 	if state == 1 {
 		window.pointer.buttonmask |= 1 << b
-		window.ev.Mousedown(p, b, window.pointer.buttonmask)		
+		window.ev.Mousedown(p, b, window.pointer.buttonmask)
 	} else {
 		window.pointer.buttonmask &= ^(1 << b)
-		window.ev.Mouseup(p, b, window.pointer.buttonmask)	
+		window.ev.Mouseup(p, b, window.pointer.buttonmask)
 	}
 }
 
@@ -151,12 +152,12 @@ func (w *Window) mousePositionInFrame() image.Point {
 
 // Mini-essay on the way of scrolling. In scrolling, there are two
 // conceptual entities: the viewport and the contents.
-// 
+//
 // I maintain that scrolling should be handled by the viewport. The
 // contents should provide the capability of drawing an arbitrary
 // subrectangle of itself. But the choice of subrectangle is managed by
 // the viewport.
-// 
+//
 // The principle here is to handle the event as "close" to where it
 // arrives as possible. In particular: scrolling will happen in the
 // browser.
@@ -169,7 +170,6 @@ func (window *Window) onMouseWheel(absolute_displacement int) {
 	window.previous_absolute_displacement = absolute_displacement
 	// log.Printf("mouse wheel delta: %d\n", delta)
 
-
 	dx := float32(delta)
 	// Scrolling is currently only in one dimension because of glfw limitation.
 	// TODO(rjkroege): enable two-dimensional scrolling.
@@ -178,15 +178,15 @@ func (window *Window) onMouseWheel(absolute_displacement int) {
 	if window.ev.Wheel(p, window.pointer.buttonmask, dx, 0, 0) != content.EVD_PREVDEF {
 		// window.x = content.Max(window.width - window.fw, window.x + float32(delta.x))
 		// Consider putting Max in some kind of base-like class.
-		window.y = content.Max(float32(window.height)-window.fh, window.y + dx)
+		window.y = graphics.MaxF(float32(window.height)-window.fh, window.y+dx)
 
 		// Can't scroll before the start of the content area (need x limit in the future.)
 		if window.y > 0.0 {
 			window.y = 0.0
 		}
-	
+
 		log.Printf("window.y is max of %f %f\n", float32(window.height)-window.fh, window.y+float32(delta))
-	
+
 		if window.y >= 0.0 {
 			log.Print("i have the scrolling sign backwards")
 		}
