@@ -1,3 +1,13 @@
 The fire-breathing Gopher invades Tokyo! Explorations
 in alternate interactive application platforms for the Internet
 age.
+
+We now have code review via gerrit at https://gerrit.liqui.org/r/ If
+you don't have a password but need one, send email to
+rjkroege@chromium.org and one will be provided. Send the crypt-ed,
+salted version if you want to keep the plaintext safely obscured.
+
+Once there, sign-in, setup gerrit and add a ssh key. At this point,
+you should be able to checkout (via git ssh) the source code and
+upload changes via typical gerrit magic.
+
