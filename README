@@ -11,3 +11,16 @@ Once there, sign-in, setup gerrit and add a ssh key. At this point,
 you should be able to checkout (via git ssh) the source code and
 upload changes via typical gerrit magic.
 
+Prior to using Gerrit, I recommend doing some setup to making it
+easier. Review
+https://gerrit.liqui.org/r/Documentation/user-upload.html#_git_push
+and install a git hook per
+https://gerrit.liqui.org/r/Documentation/user-changeid.html to process
+using a command something like this:
+
+scp -p -P 29418 <your name>@gerrit.liqui.org:hooks/commit-msg .git/hooks/
+
+If configured correctly, working with Gerrit ought to be as simple as:
+
+hack, hack, hack, git rebase to squash, git push repeat.
+
