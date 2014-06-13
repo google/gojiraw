@@ -1,15 +1,17 @@
 package dom
 
 import (
-	"code.google.com/a/google.com/p/gojira/graphics"
 	"image/color"
 	"log"
+
+	"code.google.com/a/google.com/p/gojira/graphics"
 )
 
 const (
 	VERTEX_NON   = iota // Draw the default vertex handle.
 	VERTEX_HOVER        // Draw the hover vertex handle.
 	VERTEX_PRESS        // Draw the mouse down vertex handle
+	NUM_VERTEX_STATES
 )
 
 const (
@@ -18,16 +20,16 @@ const (
 	QUAD_ELEMENT_DH = 4.
 )
 
+var modeToColor [NUM_VERTEX_STATES]color.RGBA
+
+func init() {
+	modeToColor[VERTEX_NON] = color.RGBA{0, 0, 0, 0xf0}
+	modeToColor[VERTEX_HOVER] = color.RGBA{0xff, 0, 0, 0xff}
+	modeToColor[VERTEX_PRESS] = color.RGBA{0, 0, 0xff, 0xff}
+}
+
 func (qe *QuadElement) vertexColor(mode int) color.RGBA {
-	switch mode {
-	case VERTEX_NON:
-		return color.RGBA{0, 0, 0, 0xf0}
-	case VERTEX_HOVER:
-		return color.RGBA{0xff, 0, 0, 0xff}
-	case VERTEX_PRESS:
-		return color.RGBA{0, 0, 0xff, 0xff}
-	}
-	return color.RGBA{0, 0, 0, 0xf0}
+	return modeToColor[mode]
 }
 
 // Element is a placeholder for an element. Will want, not a tree, but a true

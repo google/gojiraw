@@ -2,11 +2,12 @@
 package content
 
 import (
+	"image"
+	"log"
+
 	"code.google.com/a/google.com/p/gojira/content/dom"
 	"code.google.com/a/google.com/p/gojira/graphics"
 	"github.com/go-gl/gl"
-	"image"
-	"log"
 )
 
 // Frame is the Gojira equivalent of a RenderFrame in Chrome?
@@ -42,12 +43,16 @@ type Frame struct {
 	document []dom.QuadElement
 }
 
-// AddElement extends the display list slice and fills in the new element
-// with a quad.
+// AddElement extends the document slice and fills in the new element with a
+// quad.
 func (f *Frame) AddElement(p image.Point) {
 	ne := len(f.document)
 	nd := f.document[0 : ne+1]
 	pf := graphics.Ptfi(p)
+	// Note: the following code initializes the new point into the allocated
+	// memory in the document list. It does *not* resize the list; if we have
+	// more than 1000 quads, we'll die.
+	// TODO(vollick): make this dynamic.
 	(&nd[ne]).Init(pf)
 	f.document = nd
 }
@@ -59,7 +64,7 @@ func (f *Frame) AddElement(p image.Point) {
 func (f *Frame) FindElementAtPoint(p image.Point) (*dom.QuadElement, int) {
 	pf := graphics.Ptfi(p)
 	log.Printf("FindElementAtPoint %v", p)
-	for i := range f.document {
+	for i := len(f.document) - 1; i >= 0; i-- {
 		if v := f.document[i].FindVertex(pf); v != -1 {
 			return &f.document[i], v
 		}
@@ -96,6 +101,7 @@ func (f *Frame) Resize(w, h float32) {
 }
 
 func NewFrame() *Frame {
+	// TODO(vollick): allow more than 1000 things.
 	d := make([]dom.QuadElement, 0, 1000)
 	return &Frame{document: d}
 }
@@ -123,7 +129,7 @@ func (frame *Frame) Draw(x, y, vw, vh float32) (fw, fh float32) {
 	gl.Enable(gl.LINE_SMOOTH)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	dl.Do()
+	dl.Draw()
 
 	gl.PopMatrix()
 

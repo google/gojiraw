@@ -1,8 +1,9 @@
 package graphics
 
 import (
-	"github.com/go-gl/gl"
 	"image/color"
+
+	"github.com/go-gl/gl"
 )
 
 const (
@@ -14,7 +15,7 @@ const (
 )
 
 // TODO(vollick): We might just want to store a gob encoder here? Do we need to
-// have tighter control of the binary rep so we can pass data directly to card?
+// have tighter control of the binary rep so we can pass data directly to card.
 
 // TODO(vollick): We need to consider spatial queries, mutability and display
 // list optimization. I am not at all convinced that this representation is
@@ -64,7 +65,7 @@ func (dl *DisplayList) DrawQuads(qs [][4]Pointf) {
 	}
 }
 
-func (dl *DisplayList) Do() {
+func (dl *DisplayList) Draw() {
 	// TODO(vollick): Can we do something like this in parallel?
 	dl.cur_integer = 0
 	dl.cur_float = 0
