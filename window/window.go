@@ -2,12 +2,14 @@
 package window
 
 import (
+	"image"
+	"log"
+
 	"code.google.com/a/google.com/p/gojira/content"
 	"code.google.com/a/google.com/p/gojira/graphics"
 	"github.com/go-gl/gl"
-	"github.com/go-gl/glfw"
-	"image"
-	"log"
+
+	glfw "github.com/go-gl/glfw3"
 )
 
 // Stores the current mouse pointer position.
@@ -47,91 +49,89 @@ func NewWindow(width int, height int) *Window {
 		float32(width), float32(height), 0, c}
 }
 
-func (window *Window) RunMessageLoop() {
-	should_continue := true
-	for should_continue {
+func (window *Window) RunMessageLoop(w *glfw.Window, program *gl.Program) {
+	gl.GetError()
+	for !w.ShouldClose() {
 		// TODO(rjkroege): full generality: provide the transform to bring the Frame into
 		// Window coordinates and the width and height.
-		window.fw, window.fh = window.frame.Draw(window.x, window.y, float32(window.width), float32(window.height))
-		glfw.SwapBuffers()
-		should_continue = glfw.WindowParam(glfw.Opened) == 1
+		window.fw, window.fh = window.frame.Draw(window.x, window.y, float32(window.width), float32(window.height), program)
+		w.SwapBuffers()
+		glfw.PollEvents()
 	}
 }
 
 // Based on https://raw.github.com/go-gl/examples/master/glfw/simplewindow
 func (window *Window) Open() {
-	red_bits := 8
-	green_bits := 8
-	blue_bits := 8
-	alpha_bits := 8
-	depth_bits := 0
-	stencil_bits := 0
-	mode := glfw.Windowed
+	glfw.WindowHint(glfw.ContextVersionMajor, 4)
+	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+	glfw.WindowHint(glfw.OpenglForwardCompatible, glfw.True)
+	glfw.WindowHint(glfw.OpenglProfile, glfw.OpenglCoreProfile)
 
 	// TODO: what's go style here? How do you get clang-format for go?
 	// TODO(rjkroege): sizes should be uints
-	err := glfw.OpenWindow(int(window.width), int(window.height),
-		red_bits, green_bits, blue_bits, alpha_bits,
-		depth_bits, stencil_bits,
-		mode)
+	glfwWindow, err := glfw.CreateWindow(int(window.width), int(window.height), "Testing", nil, nil)
 
 	if err != nil {
-		// TODO: error?
+		log.Panic(err)
 	}
 
-	defer glfw.CloseWindow()
+	defer glfwWindow.Destroy()
+
+	glfwWindow.MakeContextCurrent()
 
 	// Apparantly, this enables vsync?
-	glfw.SetSwapInterval(1)
-	glfw.SetWindowTitle("Hello, World!")
-	glfw.SetWindowSizeCallback(func(w, h int) {
+	glfw.SwapInterval(1)
+
+	gl.Init()
+
+	glfwWindow.SetSizeCallback(func(_ *glfw.Window, w, h int) {
 		window.onResize(w, h)
 	})
 
-	glfw.SetMouseButtonCallback(func(b, s int) {
-		window.onMouseBtn(b, s)
+	glfwWindow.SetMouseButtonCallback(func(_ *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
+		window.onMouseBtn(button, action)
 	})
 
-	glfw.SetMouseWheelCallback(func(d int) {
-		window.onMouseWheel(d)
+	// TODO(rjkroege): Figure out how these events should be dealt with.
+	// glfw.SetMouseWheelCallback(func(d int) {
+	// 	window.onMouseWheel(d)
+	// })
+
+	// glfw.SetKeyCallback(func(k, s int) {
+	// 	window.onKey(k, s)
+	// })
+
+	// glfw.SetCharCallback(func(k, s int) {
+	// 	window.onChar(k, s)
+	// })
+
+	// TODO(vollick): Passing around one program like this is a stopgap. We
+	// should really be initializing our shader library here.
+	program := graphics.CreateDefaultShaders()
+	defer program.Delete()
+
+	glfwWindow.SetCursorPositionCallback(func(_ *glfw.Window, x, y float64) {
+		window.onMousePos(int(x), int(y))
 	})
 
-	glfw.SetKeyCallback(func(k, s int) {
-		window.onKey(k, s)
-	})
-
-	glfw.SetCharCallback(func(k, s int) {
-		window.onChar(k, s)
-	})
-
-	glfw.SetMousePosCallback(func(x, y int) {
-		window.onMousePos(x, y)
-	})
-
-	window.RunMessageLoop()
+	window.RunMessageLoop(glfwWindow, &program)
 }
 
 func (window *Window) onResize(w, h int) {
-	gl.DrawBuffer(gl.FRONT_AND_BACK)
-
-	gl.MatrixMode(gl.PROJECTION)
-	gl.LoadIdentity()
-	gl.Viewport(0, 0, w, h)
-	gl.Ortho(0, float64(w), float64(h), 0, -1.0, 1.0)
-	gl.ClearColor(1, 1, 1, 0)
-	gl.Clear(gl.COLOR_BUFFER_BIT)
-	gl.MatrixMode(gl.MODELVIEW)
-	gl.LoadIdentity()
-
+	window.width = uint32(w)
+	window.height = uint32(h)
 	log.Printf("Resize %d %d", window.width, window.height)
 }
 
-func (window *Window) onMouseBtn(button, state int) {
+func (window *Window) onMouseBtn(button glfw.MouseButton, action glfw.Action) {
+	state := uint32(action)
 	if button < 0 || button > 31 || state < 0 || state > 1 {
 		log.Fatal("button/state values from glfw are silly: ", button, state)
 	}
 
 	b := uint32(button)
+
+	// log.Printf("onMouseButton. state = %d, button = %d", state, b)
 	p := window.mousePositionInFrame()
 	if state == 1 {
 		window.pointer.buttonmask |= 1 << b
@@ -203,7 +203,6 @@ func (window *Window) onChar(key, state int) {
 }
 
 func (window *Window) onMousePos(x, y int) {
-	// log.Printf("mouse motion %d %d\n", x, y)
 	window.pointer.x = x
 	window.pointer.y = y
 

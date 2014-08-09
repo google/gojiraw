@@ -112,26 +112,23 @@ func NewFrame() *Frame {
 // Returns the enclosing boundary of the Frame.
 // TODO(rjkroege): boundaries should admit objects outside [0, w), [0. h)?
 // TODO(rjkroege): Provide and wire in types for stuff, boxes, etc.
-func (frame *Frame) Draw(x, y, vw, vh float32) (fw, fh float32) {
+func (frame *Frame) Draw(x, y, vw, vh float32, program *gl.Program) (fw, fh float32) {
 	// Build the display list.
 	dl := &graphics.DisplayList{}
 	for _, e := range frame.document {
 		e.Draw(dl)
 	}
 
-	gl.PushMatrix()
-	gl.Translatef(x, y, 0)
 	gl.ClearColor(1, 1, 1, 0)
-	gl.Clear(gl.COLOR_BUFFER_BIT)
+	graphics.CheckForGLErrors()
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	graphics.CheckForGLErrors()
 
 	gl.Enable(gl.BLEND)
-	gl.Enable(gl.POINT_SMOOTH)
-	gl.Enable(gl.LINE_SMOOTH)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	graphics.CheckForGLErrors()
 
-	dl.Draw()
-
-	gl.PopMatrix()
+	dl.Draw(program, vw, vh)
 
 	return dl.W, dl.H
 }

@@ -2,17 +2,16 @@
 package main
 
 import (
+	"log"
+
 	"code.google.com/a/google.com/p/gojira/window"
-	"fmt"
-	"github.com/go-gl/glfw"
-	"os"
+	glfw "github.com/go-gl/glfw3"
 )
 
 func main() {
 	// Initialize glfw.
-	err := glfw.Init()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "[e] %v\n", err)
+	if !glfw.Init() {
+		log.Panic("Couldn't initialize glfw3")
 		return
 	}
 
