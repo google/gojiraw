@@ -1,3 +1,7 @@
+// Copyright 2015 Google Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package cocoaview
 
 // Example: bridging Objective-C into Go.
@@ -39,4 +43,3 @@ func mouseDown(event unsafe.Pointer) bool {
 	log.Printf("mouseDown at %f %f\n", pt.x, pt.y)
 	return false
 }
-

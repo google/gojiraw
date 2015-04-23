@@ -1,7 +1,11 @@
+// Copyright 2015 Google Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package content
 
 import (
-	"code.google.com/a/google.com/p/gojira/content/dom"
+	"code.google.com/a/google.com/p/gojiraw/content/dom"
 	"github.com/rjkroege/wikitools/testhelpers"
 	"image"
 	"testing"

@@ -1,10 +1,13 @@
-// TODO make a header.
+// Copyright 2015 Google Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import (
 	"log"
 
-	"code.google.com/a/google.com/p/gojira/window"
+	"code.google.com/a/google.com/p/gojiraw/window"
 	glfw "github.com/go-gl/glfw3"
 )
 
