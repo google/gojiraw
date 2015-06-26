@@ -18,7 +18,7 @@ import (
 	"image/color"
 	"log"
 
-	"code.google.com/a/google.com/p/gojiraw/graphics"
+	"github.com/google/gojiraw/graphics"
 )
 
 const (

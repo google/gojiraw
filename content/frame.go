@@ -18,8 +18,8 @@ import (
 	"image"
 	"log"
 
-	"code.google.com/a/google.com/p/gojiraw/content/dom"
-	"code.google.com/a/google.com/p/gojiraw/graphics"
+	"github.com/google/gojiraw/content/dom"
+	"github.com/google/gojiraw/graphics"
 	"github.com/go-gl/gl"
 )
 

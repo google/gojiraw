@@ -15,7 +15,7 @@
 package content
 
 import (
-	"code.google.com/a/google.com/p/gojiraw/content/dom"
+	"github.com/google/gojiraw/content/dom"
 	"github.com/rjkroege/wikitools/testhelpers"
 	"image"
 	"testing"

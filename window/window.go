@@ -19,11 +19,11 @@ import (
 	"image"
 	"log"
 
-	"code.google.com/a/google.com/p/gojiraw/content"
-	"code.google.com/a/google.com/p/gojiraw/graphics"
+	"github.com/google/gojiraw/content"
+	"github.com/google/gojiraw/graphics"
 	"github.com/go-gl/gl"
 
-	glfw "github.com/go-gl/glfw3"
+	glfw "github.com/go-gl/glfw3/v3.0/glfw"
 )
 
 // Stores the current mouse pointer position.
