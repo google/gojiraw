@@ -17,8 +17,8 @@ package main
 import (
 	"log"
 
-	"code.google.com/a/google.com/p/gojiraw/window"
-	glfw "github.com/go-gl/glfw3"
+	"github.com/google/gojiraw/window"
+	"github.com/go-gl/glfw3/v3.0/glfw"
 )
 
 func main() {

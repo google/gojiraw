@@ -15,7 +15,7 @@
 package main
 
 import (
-	"code.google.com/a/google.com/p/gojiraw/experiments/cocoaview"
+	"github.com/google/gojiraw/experiments/cocoaview"
 )
 
 func main() {

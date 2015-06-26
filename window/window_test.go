@@ -15,7 +15,7 @@
 package window
 
 import (
-	"code.google.com/a/google.com/p/gojiraw/content"
+	"github.com/google/gojiraw/content"
 	"github.com/rjkroege/wikitools/testhelpers"
 	"image"
 	"testing"
