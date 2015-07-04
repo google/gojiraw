@@ -31,7 +31,7 @@ source and destination for the same draw operation. To preserve
 this capability, lazy rasterization and the mutability of the Inkings,
 Inkings offer a `Clone` function.
 
-A naive algorithm for rasterizing an Inkings is to postfix depth-first
+A naïve algorithm for rasterizing an Inkings is to postfix depth-first
 traverse the Inkings graph, allocating an Image for each Inkings and
 rasterizing its Enzo before combining Inkings into their parent Image
 via texture draw.
@@ -116,8 +116,9 @@ Between invoking this call and before the channel is triggered, the caller
 should not modify the `Image`.
 
 Some `Inkings` in the DAG may need longer than others. Intermediate
-`Image` objects can be multi-buffered to accomodate this. {>>This 
-would seem to require that `Clone` be synchronous.<<}
+`Image` objects can be multi-buffered to accomodate this.
+
+- [ ] Figure out if this requires `Clone` to be synchronous.
 
 ## Show
 `Show` combines rendering with presentation. It asynchronously performs the following steps
@@ -161,7 +162,6 @@ offers the capability of drawing `Image` objects.
 ## ReDrawInkings
 Operates identically to `DrawInkings` except that rather than adding a new
 Enzo to Inkings `target`, replaces the specified Enzo. 
-
 
 # GlyphString
 `GlyphString` efficiently draws runs of styled text.
