@@ -36,7 +36,7 @@ traverse the Inkings graph, allocating an Image for each Inkings and
 rasterizing its Enzo before combining Inkings into their parent Image
 via texture draw.
 
-```golang
+```go
 type Inkings Interface {
 	Repl() bool
 	Bound() Rectangle
@@ -71,7 +71,7 @@ added to another Inkings.
 undefined behaviour. Clone is central to how to use the Gojiraw API:
 maintain a `Inkings` *model*, `Clone` it and render that.
 
-```golang
+```go
 
 // Many elided details...
 model := NewInkings()
@@ -186,7 +186,7 @@ longer."
 
 Drawing proceeds as the following  "Go with vector operations" pseudo-code
 
-```golang
+```go
 // A conceptually workable but brutally slow definition of outline fonts.
 // The outline origin has its natural meaning.
 type StyleFont []Inkings

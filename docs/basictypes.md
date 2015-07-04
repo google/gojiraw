@@ -5,7 +5,7 @@ actual definition.
 # Geometry
 Standard geometry definitions.
 
-```golang
+```go
 package geometry
 
 type Point struct {
@@ -32,7 +32,7 @@ func Translate(p Point) Matrix
 Each of the compositing operations in Porter-Duff compositing.
 Names and definitions per Plan9.
 
-```golang
+```go
 package drawop
 
 const (
@@ -58,7 +58,7 @@ Gojiraw deliberately excludes font shaping from its scope. Instead, it deals
 in *glyphs*. 
 
 
-```golang
+```go
 type Glyph int32
 ```
 
