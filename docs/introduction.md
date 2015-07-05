@@ -25,10 +25,10 @@ as as UI process.
 
 Gojiraw requires an underlying system that can permit the allocation
 of surfaces, render an OpenGL command and source a stream of events.
-{>>With the movement away from OpenGL to Metal, Vulkan, DirectX, it
+(With the movement away from OpenGL to Metal, Vulkan, DirectX, it
 seems prudent to modify the architecture to assume that Gojiraw will
 be structured to support multiple different system GPU
-interfaces.<<}
+interfaces.)
 
 Gojiraw provides its customers with an API similar to the
 JavaScript canvas API with the following extensions:
@@ -50,9 +50,9 @@ be the target of rasterization. GPUs render to `Image` instances.
 
 * `Screen` a single panel, CRT, etc. An `Image` can be scanned out
 onto a `Screen` by a display controller. Overlay capability permits
-multiple images scanned out on a single screen. {>>I argue that a
+multiple images scanned out on a single screen. (I argue that a
 (clipped) view of the same Image can be displayed on several screens
-but not span multiple screens.<<}
+but not span multiple screens.)
 
 *  `Display` the union of all `Screen`s that we want to display
 to.
