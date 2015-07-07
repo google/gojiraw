@@ -21,7 +21,7 @@ and server is a replacement for P9P's
 display lists via Mojo APIs. In this context, Blink could use Gojiraw
 as as UI process.
 
-![Architecture Overview](basic-diagram.svg)
+![Architecture Overview](https://rawgit.com/rjkroege/gojiraw/addDesignDocs/docs/basic-diagram.svg)
 
 Gojiraw requires an underlying system that can permit the allocation
 of surfaces, render an OpenGL command and source a stream of events.
